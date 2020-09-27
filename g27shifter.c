@@ -4,6 +4,9 @@ void g27_initialize_io() {
   BUTTON_IO = (1 << BUTTON_SHIFT_REGISTER_MODE_PIN) | (1 << BUTTON_CLOCK_PIN);
   BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_DATA_PIN);
 
+  LED_IO |= (1 << LED_BIT);
+  LED_PORT |= (1 << LED_BIT);
+
   ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Set ADC prescalar to 128 - 125KHz sample rate @ 16MHz
   ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
   ADC_IO = 0;
@@ -73,6 +76,8 @@ static inline uint8_t decode_shifter(g27coordinates c, bool isStickDown) {
       const uint8_t sixth = (1 << 5);
       const uint8_t reverse = (1 << 6);
 
+      LED_PORT |= (1 << LED_BIT);
+
       if(c.x < STICK_X_12) {
         if(c.y > STICK_Y_135){
           return first;
@@ -88,6 +93,7 @@ static inline uint8_t decode_shifter(g27coordinates c, bool isStickDown) {
         }
         else if(c.y < STICK_Y_246R){
           if(isStickDown){
+            LED_PORT &= ~(1 << LED_BIT);
             return reverse;
           }
           return sixth;
