@@ -4,7 +4,7 @@ This project is for using a G25/27 shifter connected directly to your computer a
 
 ## Setup ##
 
-This is the pinout of the DSUB9 coming out of the shifter (female)
+This is the pinout of the DSUB9 coming out of the G27 shifter (female)
 
 PIN   | Purpose                              | Wire Color
 ------|--------------                        |------
