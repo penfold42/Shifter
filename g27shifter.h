@@ -28,6 +28,20 @@
 #define STICK_Y_135 700		// 425
 #define STICK_Y_246R 150
 
+#define STICK_Y_SEQ_3 550		// 425
+#define STICK_Y_SEQ_4 300
+
+#define neutral		0
+#define first		1
+#define second		2
+#define third		3
+#define fourth		4
+#define fifth		5
+#define sixth		6
+#define reverse		7
+#define shiftUp		8
+#define shiftDown	9
+
 typedef struct {
   uint16_t x;
   uint16_t y;

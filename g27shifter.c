@@ -66,7 +66,18 @@ static inline g27coordinates read_shift_stick_coordinates() {
   return c;
 }
 
+static inline uint8_t decode_Sequential(g27coordinates c, bool isStickDown) {
+      if(c.y > STICK_Y_SEQ_3){
+        return shiftDown;
+      }
+
+      if(c.y < STICK_Y_SEQ_4){
+        return shiftUp;
+      }
+}
+
 static inline uint8_t decode_Hpattern(g27coordinates c, bool isStickDown) {
+/* now defines in .h
       const uint8_t neutral = 0;
       const uint8_t first = (1 << 0);
       const uint8_t second = (1 << 1);
@@ -75,6 +86,7 @@ static inline uint8_t decode_Hpattern(g27coordinates c, bool isStickDown) {
       const uint8_t fifth = (1 << 4);
       const uint8_t sixth = (1 << 5);
       const uint8_t reverse = (1 << 6);
+*/
 
 //      LED_PORT |= (1 << LED_BIT);
 
@@ -115,7 +127,7 @@ uint8_t read_selected_gear(bool isStickDown, bool isSequential){
   g27coordinates c = read_shift_stick_coordinates();
   uint8_t selectedGear = 0;
   if (isSequential) {
-//  selectedGear = decode_Sequential(c, isStickDown);
+    selectedGear = decode_Sequential(c, isStickDown);
   } else {
     selectedGear = decode_Hpattern(c, isStickDown);
   }
