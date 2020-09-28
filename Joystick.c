@@ -120,14 +120,21 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	uint16_t buttons = read_buttons();
 	bool isShifterPressed = ((buttons & (1 << 1)) == (1<< 1)) & 1;
 
-	uint8_t shifter = read_selected_gear(isShifterPressed);
+	bool isSequential = ((buttons & (1 << 3)) == (1<< 3)) & 1;
+	if (isSequential) {
+		LED_PORT &= ~(1 << LED_BIT);
+	} else {
+		LED_PORT |= (1 << LED_BIT);
+	}
+
+	uint8_t shifter = read_selected_gear(isShifterPressed, isSequential);
 
 	uint8_t first4Buttons = (buttons >> 4) & 0x0F;
 	uint8_t last8Buttons = (buttons >> 8);
 
-	JoystickReport->Buttons[0] = shifter | ((first4Buttons << 4) & 0x80); //Shift 4th button to bit7
+	JoystickReport->Buttons[0] = shifter | (isSequential * 0x80); // Sequential to top bit
 	JoystickReport->Buttons[1] = last8Buttons;
-	JoystickReport->Buttons[2] = first4Buttons & 7;
+	JoystickReport->Buttons[2] = first4Buttons & 0xf;
 
 	*ReportSize = sizeof(USB_JoystickReport_Data_t);
 	return true;

@@ -37,7 +37,6 @@ void g27_initialize_io();
 
 uint16_t read_buttons();
 
-uint8_t read_selected_gear(bool isStickDown);
-
+uint8_t read_selected_gear(bool isStickDown, bool isSequential);
 
 #endif

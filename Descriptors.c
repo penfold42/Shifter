@@ -7,7 +7,7 @@
 
 #include "Descriptors.h"
 
-#define Buttons 19
+#define Buttons 20
 
 /** HID class report descriptor. This is a special descriptor constructed with values from the
  *  USBIF HID class specification to describe the reports and capabilities of the HID device. This
@@ -30,7 +30,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 			HID_RI_REPORT_SIZE(8, 0x01),
 			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
 			HID_RI_REPORT_COUNT(8, 1),
-			HID_RI_REPORT_SIZE(8, 5),
+			HID_RI_REPORT_SIZE(8, 4),
 			HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
 		HID_RI_END_COLLECTION(0),
 	HID_RI_END_COLLECTION(0)
