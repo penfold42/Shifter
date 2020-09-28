@@ -22,6 +22,9 @@
 			uint8_t Buttons[3];
 			uint16_t Xaxis;
 			uint16_t Yaxis;
+			uint16_t Clutch;
+			uint16_t Brake;
+			uint16_t Accel;
 		} USB_JoystickReport_Data_t;
 
 	/* Function Prototypes: */
