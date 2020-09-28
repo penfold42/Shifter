@@ -47,9 +47,9 @@ typedef struct {
   uint16_t y;
 } g27coordinates;
 
-void g27_initialize_io();
+void g27_initialize_io(void);
 
-uint16_t read_buttons();
+uint16_t read_buttons(void);
 
 uint8_t read_selected_gear(bool isStickDown, bool isSequential);
 

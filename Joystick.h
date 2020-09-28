@@ -20,6 +20,8 @@
 		typedef struct
 		{
 			uint8_t Buttons[3];
+			uint16_t Xaxis;
+			uint16_t Yaxis;
 		} USB_JoystickReport_Data_t;
 
 	/* Function Prototypes: */

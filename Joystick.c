@@ -25,6 +25,11 @@ USB_ClassInfo_HID_Device_t Joystick_HID_Interface =
 	};
 
 
+/* yay for global variables....
+ * use this as a global as ADC reads are expensive
+ */
+g27coordinates c;
+
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
  */
@@ -148,6 +153,10 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	JoystickReport->Buttons[0] = shifter | (isSequential * 0x80); // Sequential to top bit
 	JoystickReport->Buttons[1] = last8Buttons;
 	JoystickReport->Buttons[2] |= first4Buttons & 0xf;
+
+	// scale 10bit adc to 16bit joystick axes (and flip Y)
+	JoystickReport->Xaxis = (c.x-512)*(32768/512);
+	JoystickReport->Yaxis = (511-c.y)*(32768/512);
 
 	*ReportSize = sizeof(USB_JoystickReport_Data_t);
 	return true;
