@@ -5,9 +5,9 @@
 #include <util/delay.h>
 #include <avr/io.h>
 
-#define BUTTON_SHIFT_REGISTER_MODE_PIN 0	// D.0 = Arduino 3
-#define BUTTON_DATA_PIN 4			// D.4 = Arduino 4
-#define BUTTON_CLOCK_PIN 1			// D.1 = Arduino 2
+#define BUTTON_SHIFT_REGISTER_MODE_PIN 0	// PortD.0 = Arduino 3
+#define BUTTON_DATA_PIN 4			// PortD.4 = Arduino 4
+#define BUTTON_CLOCK_PIN 1			// PortD.1 = Arduino 2
 #define BUTTON_MODE_AND_CLOCK_WAIT 10
 #define NUMBER_OF_SHIFT_REGISTER_BUTTONS 16
 
@@ -16,13 +16,14 @@
 #define BUTTON_IO DDRD
 
 #define LED_PORT PORTE
-#define LED_BIT 6
+#define LED_BIT 6				// PortE.6 = Arduino 7
 #define LED_IO DDRE
 
-#define STICK_X_ADC 7				// F7 = Arduino A0
-#define STICK_Y_ADC 6				// F6 = Arduino A1
+#define STICK_X_ADC 7				// PortF.7 = Arduino A0
+#define STICK_Y_ADC 6				// PortF.6 = Arduino A1
 #define ADC_IO DDRF
 
+/*
 #define STICK_X_12 330
 #define STICK_X_56R 550
 #define STICK_Y_135 700		// 425
@@ -30,6 +31,7 @@
 
 #define STICK_Y_SEQ_3 550		// 425
 #define STICK_Y_SEQ_4 300
+*/
 
 #define neutral		0
 #define first		1

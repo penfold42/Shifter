@@ -25,6 +25,7 @@
 			uint16_t Clutch;
 			uint16_t Brake;
 			uint16_t Accel;
+			uint8_t Hat;
 		} USB_JoystickReport_Data_t;
 
 	/* Function Prototypes: */

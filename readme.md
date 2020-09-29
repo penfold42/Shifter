@@ -70,7 +70,7 @@ The ADC value is then 1.3 / 5 \* 1024. This should be the value for **STICK_X_12
 Repeat for the other STICK_\* values.
 
 ## Differences between G27 and G25
-To make this compatible with a G25 shifter switch pin 1 and 7 going into the DSUB9, that is clock on pin 7 and +5V on pin 1.
+To make this compatible with a G25 shifter move clock from pin 1 to 7 going into the DSUB9.
 
 Since the G27 doesn't have the sequential mode, those buttons will not activate.
 

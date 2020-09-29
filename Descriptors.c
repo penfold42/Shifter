@@ -7,7 +7,12 @@
 
 #include "Descriptors.h"
 
+// 8 inputs: gears 1-6, reverse gear, H/Seq mode
+// 8 inputs: triangle, circle, square, cross, 4 red buttons
+// 6 inputs: spare1, reverse button, spare2, H/Seq mode, SeqUp, SeqDown
 #define Buttons 24
+
+// Shifter X and Y, Clutch, Brake, Accelerator
 #define Axes 5
 
 /** HID class report descriptor. This is a special descriptor constructed with values from the
@@ -21,6 +26,8 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 	HID_RI_USAGE_PAGE(8, 0x01),
 	HID_RI_USAGE(8, 0x04),
 	HID_RI_COLLECTION(8, 0x01),
+
+		// Buttons
 		HID_RI_COLLECTION(8, 0x00),
 			HID_RI_USAGE_PAGE(8, 0x09),
 			HID_RI_USAGE_MINIMUM(8, 0x01),
@@ -30,19 +37,17 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 			HID_RI_REPORT_COUNT(8, Buttons),
 			HID_RI_REPORT_SIZE(8, 0x01),
 			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
-// padding 20 buttons needs 4
-//			HID_RI_REPORT_COUNT(8, 1),
-//			HID_RI_REPORT_SIZE(8, 4),
-//			HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+
 		HID_RI_END_COLLECTION(0),
 
+		// Shifter analog X/Y and pedals
 		HID_RI_COLLECTION(8, 0x00),
 			HID_RI_USAGE_PAGE(8, 0x01),
-			HID_RI_USAGE(8, 0x30),
-			HID_RI_USAGE(8, 0x31),
-			HID_RI_USAGE(8, 0x36),
-			HID_RI_USAGE(8, 0x36),
-			HID_RI_USAGE(8, 0x36),
+			HID_RI_USAGE(8, 0x30),	// X axis
+			HID_RI_USAGE(8, 0x31),	// Y axis
+			HID_RI_USAGE(8, 0x36),	// slider
+			HID_RI_USAGE(8, 0x36),	// slider
+			HID_RI_USAGE(8, 0x36),	// slider
 			HID_RI_USAGE_MINIMUM(8, 0x01),
 			HID_RI_USAGE_MAXIMUM(8, Axes),
 			HID_RI_LOGICAL_MINIMUM(16, -32768),
@@ -50,6 +55,22 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 			HID_RI_REPORT_COUNT(8, Axes),
 			HID_RI_REPORT_SIZE(8, 16),
 			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_VOLATILE),
+		HID_RI_END_COLLECTION(0),
+
+		// Hat switch
+		HID_RI_COLLECTION(8, 0x00),
+			HID_RI_USAGE_PAGE(8, 0x01),
+			HID_RI_USAGE(8, 0x39),
+			HID_RI_LOGICAL_MINIMUM(16, 1),
+			HID_RI_LOGICAL_MAXIMUM(16, 8),
+			HID_RI_REPORT_COUNT(8, 1),
+			HID_RI_REPORT_SIZE(8, 4),
+			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE ),
+
+			// padding for byte aligned
+			HID_RI_REPORT_COUNT(8, 1),
+			HID_RI_REPORT_SIZE(8, 4),
+			HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
 		HID_RI_END_COLLECTION(0),
 
 	HID_RI_END_COLLECTION(0)

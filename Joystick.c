@@ -129,7 +129,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 	uint8_t shifter = read_selected_gear(isShifterPressed, isSequential);
 
-	if (isSequential) {
+	if (buttons & 0x02) {
 		LED_PORT &= ~(1 << LED_BIT);
 	} else {
 		LED_PORT |= (1 << LED_BIT);
@@ -147,12 +147,13 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		shifter = 1 << (shifter-1);
 	}
 
-	uint8_t first4Buttons = (buttons >> 4) & 0x0F;
-	uint8_t last8Buttons = (buttons >> 8);
+	uint8_t Red4Buttons = (buttons >> 4) & 0x0f;
+	uint8_t Top4Buttons = (buttons >> 8) & 0x0f;
+	uint8_t DPad4Buttons = (buttons >> 12) & 0x0f;
 
 	JoystickReport->Buttons[0] = shifter | (isSequential * 0x80); // Sequential to top bit
-	JoystickReport->Buttons[1] = last8Buttons;
-	JoystickReport->Buttons[2] |= first4Buttons & 0xf;
+	JoystickReport->Buttons[1] = (Red4Buttons<<4) | Top4Buttons;
+	JoystickReport->Buttons[2] |= buttons & 0xf;
 
 	// scale 10bit adc to 16bit joystick axes (and flip Y)
 	JoystickReport->Xaxis  = (c.x-512)*(32768/512);
@@ -160,7 +161,45 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 	JoystickReport->Clutch = (c.x-512)*(32768/512);
 	JoystickReport->Brake  = (511-c.y)*(32768/512);
-	JoystickReport->Accel  = first4Buttons * (32768/16);
+
+	// count the buttons pressed
+	uint8_t bits = JoystickReport->Buttons[1];
+	int cnt = 0;
+	for (int i=0; i<8; i++) {
+		if (bits & 0b00000001) cnt++;
+		bits >>=1;
+	}
+	JoystickReport->Accel  = (cnt-4) * (65535/8);
+
+	switch (DPad4Buttons) {
+		case 0b1000:	// N
+			JoystickReport->Hat = 1;
+			break;
+		case 0b1001:	// NE
+			JoystickReport->Hat = 2;
+			break;
+		case 0b0001:	// E
+			JoystickReport->Hat = 3;
+			break;
+		case 0b0101:	// SE
+			JoystickReport->Hat = 4;
+			break;
+		case 0b0100:	// S
+			JoystickReport->Hat = 5;
+			break;
+		case 0b0110:	// SW
+			JoystickReport->Hat = 6;
+			break;
+		case 0b0010:	// W
+			JoystickReport->Hat = 7;
+			break;
+		case 0b1010:	// NW
+			JoystickReport->Hat = 8;
+			break;
+		default:
+			JoystickReport->Hat = 0;
+			break;
+	}
 
 	*ReportSize = sizeof(USB_JoystickReport_Data_t);
 	return true;

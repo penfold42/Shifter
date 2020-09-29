@@ -1,5 +1,19 @@
 #include "g27shifter.h"
 
+// Calibration settings
+uint16_t STICK_X_12	= 380;
+uint16_t STICK_X_56R	= 650;        // 550;
+uint16_t STICK_Y_135	= 700;        // was 425
+uint16_t STICK_Y_246R	= 150;
+
+uint16_t STICK_Y_SEQ_3	= 550;
+uint16_t STICK_Y_SEQ_4	= 300;
+
+uint16_t STICK_X_MIN	= 0;
+uint16_t STICK_X_MAX	= 1023;
+uint16_t STICK_Y_MIN	= 0;
+uint16_t STICK_Y_MAX	= 1023;
+
 void g27_initialize_io() {
   BUTTON_IO = (1 << BUTTON_SHIFT_REGISTER_MODE_PIN) | (1 << BUTTON_CLOCK_PIN);
   BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_DATA_PIN);
@@ -64,6 +78,10 @@ extern g27coordinates c;
 void update_adc_values() {
   c.x = read_adc(STICK_X_ADC);
   c.y = read_adc(STICK_Y_ADC);
+  if (c.x >= STICK_X_MAX) STICK_X_MAX = c.x;
+  if (c.x <= STICK_X_MIN) STICK_X_MIN = c.x;
+  if (c.y >= STICK_Y_MAX) STICK_Y_MAX = c.y;
+  if (c.y <= STICK_Y_MIN) STICK_Y_MIN = c.y;
 }
 
 static inline uint8_t decode_Sequential(g27coordinates c, bool isStickDown) {
