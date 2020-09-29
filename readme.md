@@ -6,7 +6,7 @@ This project is for using a G25/27 shifter connected directly to your computer a
 
 This is the pinout of the DSUB9 coming out of the G27 shifter (female)
 
-PIN   | Purpose                              | Wire Color
+PIN   | G27 Purpose                          | G27 Wire Color
 ------|--------------                        |------
 1     | Clock                                | Purple
 2     | Serial Button Data                   | Gray
@@ -14,9 +14,23 @@ PIN   | Purpose                              | Wire Color
 4     | X Axis                               | Orange
 5     | Ground LEDs                          | White
 6     | Ground Logic                         | Black
-7     | +5V Short                            | Red
+7     | +5V Sense                            | Red
 8     | Y Axis                               | Green
-9     | +5V Short                            | Red
+9     | +5V Supply                           | Red
+
+This is the pinout of the DSUB9 coming out of the G25 shifter (female)
+
+PIN   | G25 Purpose                          | G25 Wire Color
+------|--------------                        |------
+1     | +5 Sense                             | 
+2     | Serial Button Data                   | Gray
+3     | Shift Register Mode Parallel/Serial  | Yellow
+4     | X Axis                               | Orange
+5     | Power LED                            | Red
+6     | Ground Logic                         | Black
+7     | Clock                                | Purple
+8     | Y Axis                               | Green
+9     | +5V Supply                           | Black
 
 The first step is to wire the shfiter I/O.
 
@@ -26,7 +40,17 @@ Next up is defining which pin **BUTTON_SHIFT_REGISTER_MODE_PIN**, **BUTTON_DATA_
 
 After that is connecting the X and Y pins to an ADC port each, these are defined by **STICK_X_ADC** and **STICK_Y_ADC**.
 
-Next is powering the logic circuitry, connect **pin 7** (or 9 for that matter since they're connected internally) to +5V or VCC and **pin 6** to ground. I recommend not connecting **pin 5** since that will power the leds and in turn reduce the voltage over the X and Y pots when powering from USB, doing this with an external power supply should work better.
+Next is powering the logic circuitry, connect **pin 9** to +5V or VCC and **pin 6** to ground. I recommend not connecting **pin 5** since that will power the leds and in turn reduce the voltage over the X and Y pots when powering from USB, doing this with an external power supply should work better.
+
+Shifter Purpose                  | Atmega pin   | Arduino pin
+---------------------------------|--------------|-------------
+BUTTON_SHIFT_REGISTER_MODE_PIN   | PortD.0      | Arduino 3
+BUTTON_DATA_PIN                  | PortD.4      | Arduino 4
+BUTTON_CLOCK_PIN                 | PortD.1      | Arduino 2
+STICK_X_ADC                      | PortF.7      | Arduino A0
+STICK_Y_ADC                      | PortF.6      | Arduino A1
+LED_BIT                          | PortE.6      | Arduino 7
+
 
 ## Build
 Run the make file and flash the hex onto your AVR.
@@ -48,7 +72,7 @@ Repeat for the other STICK_\* values.
 ## Differences between G27 and G25
 To make this compatible with a G25 shifter switch pin 1 and 7 going into the DSUB9, that is clock on pin 7 and +5V on pin 1.
 
-Since the G27 doesn't have the sequential mode that is not implemented, but as seen in the schematic value 4 from the shift register tells wether the shifter is in H or sequential mode.
+Since the G27 doesn't have the sequential mode, those buttons will not activate.
 
 ##Hardware operation
 The X and Y pins are simply potentiometers that tells how the stick is positioned. The buttons work through parallel in serial out shift registers. Pulling the mode pin low then holding it high latches the current input pins so that they can be sequentially read through the serial output. The shift register advances to the next value on the falling edge on the clock pin.
