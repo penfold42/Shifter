@@ -16,7 +16,8 @@ uint16_t STICK_Y_MAX	= 1023;
 
 void g27_initialize_io() {
   BUTTON_IO = (1 << BUTTON_SHIFT_REGISTER_MODE_PIN) | (1 << BUTTON_CLOCK_PIN);
-  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_DATA_PIN);
+//  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_DATA_PIN);
+  BUTTON_PORT |= (1 << BUTTON_DATA_PIN);	// pullup on data pin
 
   LED_IO |= (1 << LED_BIT);
   LED_PORT |= (1 << LED_BIT);

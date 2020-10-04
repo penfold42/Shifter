@@ -1,5 +1,6 @@
 #include "Joystick.h"
 #include "g27shifter.h"
+#include "Options.h"
 
 /** Buffer to hold the previously generated HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevJoystickHIDReportBuffer[sizeof(USB_JoystickReport_Data_t)];
@@ -123,42 +124,45 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	USB_JoystickReport_Data_t* JoystickReport = (USB_JoystickReport_Data_t*)ReportData;
 
 	uint16_t buttons = read_buttons();
-	bool isShifterPressed = ((buttons & (1 << 1)) == (1<< 1)) & 1;
-
-	bool isSequential = ((buttons & (1 << 3)) == (1<< 3)) & 1;
-
-	uint8_t shifter = read_selected_gear(isShifterPressed, isSequential);
-
-	if (buttons & 0x02) {
-		LED_PORT &= ~(1 << LED_BIT);
-	} else {
-		LED_PORT |= (1 << LED_BIT);
-	}
-
-	if (shifter == shiftUp) {
-		JoystickReport->Buttons[2] = 0x10;
-		shifter = 0;
-	} else if (shifter == shiftDown) {
-		JoystickReport->Buttons[2] = 0x20;
-		shifter = 0;
-	} else if (shifter == neutral) {
-
-	} else {
-		shifter = 1 << (shifter-1);
-	}
-
 	uint8_t Red4Buttons = (buttons >> 4) & 0x0f;
 	uint8_t Top4Buttons = (buttons >> 8) & 0x0f;
 	uint8_t DPad4Buttons = (buttons >> 12) & 0x0f;
 
-	JoystickReport->Buttons[0] = shifter | (isSequential * 0x80); // Sequential to top bit
-	JoystickReport->Buttons[1] = (Red4Buttons<<4) | Top4Buttons;
-	JoystickReport->Buttons[2] |= buttons & 0xf;
+	bool isShifterPressed = ((buttons & (1 << 1)) == (1<< 1)) & 1;
+	bool isSequential = ((buttons & (1 << 3)) == (1<< 3)) & 1;
 
+	// extinguish power LED when in reverse
+	if (isShifterPressed) {
+		LED_PORT |= (1 << LED_BIT);
+	} else {
+		LED_PORT &= ~(1 << LED_BIT);
+	}
+
+	JoystickReport->Buttons[0] = (isSequential * 0x80); // Sequential to top bit
+	JoystickReport->Buttons[1] = (Red4Buttons<<4) | Top4Buttons;
+	JoystickReport->Buttons[2] = 0 | (buttons & 0xf);
+
+	uint8_t shifter = read_selected_gear(isShifterPressed, isSequential);
+	if (shifter == shiftUp) {
+		JoystickReport->Buttons[2] |= 0x10;
+	} else if (shifter == shiftDown) {
+		JoystickReport->Buttons[2] |= 0x20;
+	} else if (shifter == neutral) {
+	} else {
+		JoystickReport->Buttons[0] |= (1 << (shifter-1));
+	}
+
+
+
+// Process and send clutch, brake, accelerator pedals
+
+#if (SHIFTER_JOY == 1)
 	// scale 10bit adc to 16bit joystick axes (and flip Y)
 	JoystickReport->Xaxis  = (c.x-512)*(32768/512);
 	JoystickReport->Yaxis  = (511-c.y)*(32768/512);
+#endif
 
+#if (USE_PEDALS == 1)
 	JoystickReport->Clutch = (c.x-512)*(32768/512);
 	JoystickReport->Brake  = (511-c.y)*(32768/512);
 
@@ -170,6 +174,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 		bits >>=1;
 	}
 	JoystickReport->Accel  = (cnt-4) * (65535/8);
+#endif
 
 	switch (DPad4Buttons) {
 		case 0b1000:	// N

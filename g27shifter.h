@@ -5,6 +5,8 @@
 #include <util/delay.h>
 #include <avr/io.h>
 
+#include "Options.h"
+
 #define BUTTON_SHIFT_REGISTER_MODE_PIN 0	// PortD.0 = Arduino 3
 #define BUTTON_DATA_PIN 4			// PortD.4 = Arduino 4
 #define BUTTON_CLOCK_PIN 1			// PortD.1 = Arduino 2

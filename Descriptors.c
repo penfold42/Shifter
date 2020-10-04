@@ -6,6 +6,7 @@
  */
 
 #include "Descriptors.h"
+#include "Options.h"
 
 // 8 inputs: gears 1-6, reverse gear, H/Seq mode
 // 8 inputs: triangle, circle, square, cross, 4 red buttons
@@ -13,7 +14,7 @@
 #define Buttons 24
 
 // Shifter X and Y, Clutch, Brake, Accelerator
-#define Axes 5
+#define Axes ((SHIFTER_JOY*2) + (USE_PEDALS*3))
 
 /** HID class report descriptor. This is a special descriptor constructed with values from the
  *  USBIF HID class specification to describe the reports and capabilities of the HID device. This
@@ -40,14 +41,19 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 
 		HID_RI_END_COLLECTION(0),
 
+#if Axes > 0
 		// Shifter analog X/Y and pedals
 		HID_RI_COLLECTION(8, 0x00),
 			HID_RI_USAGE_PAGE(8, 0x01),
+#if (SHIFTER_JOY == 1)
 			HID_RI_USAGE(8, 0x30),	// X axis
 			HID_RI_USAGE(8, 0x31),	// Y axis
+#endif
+#if (USE_PEDALS == 1)
 			HID_RI_USAGE(8, 0x36),	// slider
 			HID_RI_USAGE(8, 0x36),	// slider
 			HID_RI_USAGE(8, 0x36),	// slider
+#endif
 			HID_RI_USAGE_MINIMUM(8, 0x01),
 			HID_RI_USAGE_MAXIMUM(8, Axes),
 			HID_RI_LOGICAL_MINIMUM(16, -32768),
@@ -56,6 +62,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 			HID_RI_REPORT_SIZE(8, 16),
 			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE | HID_IOF_VOLATILE),
 		HID_RI_END_COLLECTION(0),
+#endif
 
 		// Hat switch
 		HID_RI_COLLECTION(8, 0x00),
@@ -179,7 +186,8 @@ const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR
  *  and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
  *  Descriptor.
  */
-const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"G27 Shifter");
+//const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"G27 Shifter");
+const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(USB_NAME);
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given
