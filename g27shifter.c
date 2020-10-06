@@ -19,8 +19,8 @@ void g27_initialize_io() {
 //  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_DATA_PIN);
   BUTTON_PORT |= (1 << BUTTON_DATA_PIN);	// pullup on data pin
 
-  LED_IO |= (1 << LED_BIT);
-  LED_PORT |= (1 << LED_BIT);
+  G25_LED_IO |= (1 << G25_LED_BIT);
+  G25_LED_PORT |= (1 << G25_LED_BIT);
 
   ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Set ADC prescalar to 128 - 125KHz sample rate @ 16MHz
   ADMUX |= (1 << REFS0); // Set ADC reference to AVCC

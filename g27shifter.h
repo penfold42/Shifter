@@ -17,9 +17,18 @@
 #define BUTTON_PIN PIND
 #define BUTTON_IO DDRD
 
-#define LED_PORT PORTE
-#define LED_BIT 6				// PortE.6 = Arduino 7
-#define LED_IO DDRE
+#define G25_LED_PORT PORTE
+#define G25_LED_BIT 6				// PortE.6 = Arduino 7
+#define G25_LED_IO DDRE
+
+#define TX_LED_PORT PORTD
+#define TX_LED_BIT 5                           // PortD.5 = Arduino NO!
+#define TX_LED_IO DDRD
+
+#define RX_LED_PORT PORTB
+#define RX_LED_BIT 0                           // PortB.0 = Arduino 17?
+#define RX_LED_IO DDRB
+
 
 #define STICK_X_ADC 7				// PortF.7 = Arduino A0
 #define STICK_Y_ADC 6				// PortF.6 = Arduino A1

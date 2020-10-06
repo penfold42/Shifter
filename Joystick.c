@@ -133,9 +133,9 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 	// extinguish power LED when in reverse
 	if (isShifterPressed) {
-		LED_PORT |= (1 << LED_BIT);
+		G25_LED_PORT |= (1 << G25_LED_BIT);
 	} else {
-		LED_PORT &= ~(1 << LED_BIT);
+		G25_LED_PORT &= ~(1 << G25_LED_BIT);
 	}
 
 	JoystickReport->Buttons[0] = (isSequential * 0x80); // Sequential to top bit
