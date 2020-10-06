@@ -15,7 +15,7 @@ uint16_t STICK_Y_MIN	= 0;
 uint16_t STICK_Y_MAX	= 1023;
 
 void g27_initialize_io() {
-  BUTTON_IO = (1 << BUTTON_SHIFT_REGISTER_MODE_PIN) | (1 << BUTTON_CLOCK_PIN);
+  BUTTON_IO |= ( (1 << BUTTON_SRMODE_PIN) | (1 << BUTTON_CLOCK_PIN) );
 //  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_DATA_PIN);
   BUTTON_PORT |= (1 << BUTTON_DATA_PIN);	// pullup on data pin
 
@@ -28,22 +28,22 @@ void g27_initialize_io() {
 
   ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Set ADC prescalar to 128 - 125KHz sample rate @ 16MHz
   ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
-  ADC_IO = 0;
+  ADC_TO_IN	// macro defined with hardware pins
 }
 
 static inline void latch_shift_register() {
-  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_SHIFT_REGISTER_MODE_PIN);
+  BUTTON_PORT &= ~(1 << BUTTON_SRMODE_PIN);
   _delay_us(BUTTON_MODE_AND_CLOCK_WAIT);
-  BUTTON_PORT = BUTTON_PORT | (1 << BUTTON_SHIFT_REGISTER_MODE_PIN);
+  BUTTON_PORT |= (1 << BUTTON_SRMODE_PIN);
 }
 
 static inline uint8_t read_button() {
-  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_CLOCK_PIN);
+  BUTTON_PORT &= ~(1 << BUTTON_CLOCK_PIN);
   _delay_us(BUTTON_MODE_AND_CLOCK_WAIT);
 
   uint8_t button = (BUTTON_PIN >> BUTTON_DATA_PIN) & 0x01;
 
-  BUTTON_PORT = BUTTON_PORT | (1 << BUTTON_CLOCK_PIN);
+  BUTTON_PORT |= (1 << BUTTON_CLOCK_PIN);
   _delay_us(BUTTON_MODE_AND_CLOCK_WAIT);
   return button;
 }
