@@ -21,6 +21,10 @@ void g27_initialize_io() {
 
   G25_LED_IO |= (1 << G25_LED_BIT);
   G25_LED_PORT |= (1 << G25_LED_BIT);
+  RX_LED_IO |= (1 << RX_LED_BIT);
+  RX_LED_PORT |= (1 << RX_LED_BIT);
+  TX_LED_IO |= (1 << TX_LED_BIT);
+  TX_LED_PORT |= (1 << TX_LED_BIT);
 
   ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Set ADC prescalar to 128 - 125KHz sample rate @ 16MHz
   ADMUX |= (1 << REFS0); // Set ADC reference to AVCC

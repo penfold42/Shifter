@@ -103,6 +103,11 @@ void EVENT_USB_Device_ControlRequest(void)
 void EVENT_USB_Device_StartOfFrame(void)
 {
 	HID_Device_MillisecondElapsed(&Joystick_HID_Interface);
+
+	static int countMS;
+	if (++countMS > 1000) countMS = 0;
+	(countMS == 0) ? (TX_LED_PORT &= ~(1<<TX_LED_BIT)) : (TX_LED_PORT |= (1<<TX_LED_BIT));
+	(countMS == 100) ? (RX_LED_PORT &= ~(1<<RX_LED_BIT)) : (RX_LED_PORT |= (1<<RX_LED_BIT));
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.

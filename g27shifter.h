@@ -7,15 +7,32 @@
 
 #include "Options.h"
 
+#if (HWVARIANT == 1)
+
 #define BUTTON_SHIFT_REGISTER_MODE_PIN 0	// PortD.0 = Arduino 3
 #define BUTTON_DATA_PIN 4			// PortD.4 = Arduino 4
 #define BUTTON_CLOCK_PIN 1			// PortD.1 = Arduino 2
-#define BUTTON_MODE_AND_CLOCK_WAIT 10
-#define NUMBER_OF_SHIFT_REGISTER_BUTTONS 16
 
 #define BUTTON_PORT PORTD
 #define BUTTON_PIN PIND
 #define BUTTON_IO DDRD
+
+#elif (HWVARIANT == 2)
+
+#define BUTTON_SHIFT_REGISTER_MODE_PIN 6	// PortB.6 = Arduino 10
+#define BUTTON_DATA_PIN 3			// PortB.3 = Arduino 14
+#define BUTTON_CLOCK_PIN 1			// PortB.1 = Arduino 15
+
+#define BUTTON_PORT PORTB
+#define BUTTON_PIN PINB
+#define BUTTON_IO DDRB
+
+#else
+#error invalid HWVARIANT
+#endif
+
+#define BUTTON_MODE_AND_CLOCK_WAIT 10
+#define NUMBER_OF_SHIFT_REGISTER_BUTTONS 16
 
 #define G25_LED_PORT PORTE
 #define G25_LED_BIT 6				// PortE.6 = Arduino 7
@@ -29,20 +46,10 @@
 #define RX_LED_BIT 0                           // PortB.0 = Arduino 17?
 #define RX_LED_IO DDRB
 
-
 #define STICK_X_ADC 7				// PortF.7 = Arduino A0
 #define STICK_Y_ADC 6				// PortF.6 = Arduino A1
 #define ADC_IO DDRF
 
-/*
-#define STICK_X_12 330
-#define STICK_X_56R 550
-#define STICK_Y_135 700		// 425
-#define STICK_Y_246R 150
-
-#define STICK_Y_SEQ_3 550		// 425
-#define STICK_Y_SEQ_4 300
-*/
 
 #define neutral		0
 #define first		1
