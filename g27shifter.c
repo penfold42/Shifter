@@ -29,6 +29,9 @@ void g27_initialize_io() {
   ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Set ADC prescalar to 128 - 125KHz sample rate @ 16MHz
   ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
   ADC_IO = 0;
+
+  // Enable SPI, Master mode, prescaler = /128:
+  SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1) | (1<<SPR0);
 }
 
 static inline void latch_shift_register() {
@@ -59,11 +62,25 @@ uint16_t read_buttons() {
   uint16_t buttonResult = 0;
   uint8_t buttons[NUMBER_OF_SHIFT_REGISTER_BUTTONS];
 
+  /*
   read_shift_register_buttons(buttons);
   for (uint8_t i = 0; i < NUMBER_OF_SHIFT_REGISTER_BUTTONS; i++) {
       buttonResult |= (buttons[i] << i);
   }
+  */
 
+  // latch shift registers
+  BUTTON_PORT = BUTTON_PORT & ~(1 << BUTTON_SHIFT_REGISTER_MODE_PIN);
+  _delay_us(BUTTON_MODE_AND_CLOCK_WAIT);
+  BUTTON_PORT = BUTTON_PORT | (1 << BUTTON_SHIFT_REGISTER_MODE_PIN);
+
+  SPDR = 0;			// do a transfer
+  while(! (SPSR & (1<<SPIF)) );	// wait for it to finish
+  buttonResult = SPDR;		// read the byte from 1st SR
+  SPDR = 0;			// do a transfer
+  while(! (SPSR & (1<<SPIF)) );	// wait for it to finish
+  buttonResult |= (SPDR<<8);	// read the byte from 2nd SR
+ 
   return buttonResult;
 }
 
