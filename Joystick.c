@@ -29,7 +29,7 @@ USB_ClassInfo_HID_Device_t Joystick_HID_Interface =
 /* yay for global variables....
  * use this as a global as ADC reads are expensive
  */
-g27coordinates c;
+extern g27coordinates AdcValues;
 
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
@@ -107,7 +107,7 @@ void EVENT_USB_Device_StartOfFrame(void)
 	static int countMS;
 	if (++countMS > 1000) countMS = 0;
 	(countMS == 0) ? (TX_LED_PORT &= ~(1<<TX_LED_BIT)) : (TX_LED_PORT |= (1<<TX_LED_BIT));
-	(countMS == 100) ? (RX_LED_PORT &= ~(1<<RX_LED_BIT)) : (RX_LED_PORT |= (1<<RX_LED_BIT));
+//	(countMS == 100) ? (RX_LED_PORT &= ~(1<<RX_LED_BIT)) : (RX_LED_PORT |= (1<<RX_LED_BIT));
 }
 
 /** HID class driver callback function for the creation of HID reports to the host.
@@ -163,13 +163,19 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 #if (SHIFTER_JOY == 1)
 	// scale 10bit adc to 16bit joystick axes (and flip Y)
-	JoystickReport->Xaxis  = (c.x-512)*(32768/512);
-	JoystickReport->Yaxis  = (511-c.y)*(32768/512);
+	JoystickReport->Xaxis  = (AdcValues.x-512)*(32768/512);
+	JoystickReport->Yaxis  = (511-AdcValues.y)*(32768/512);
 #endif
 
 #if (USE_PEDALS == 1)
-	JoystickReport->Clutch = (c.x-512)*(32768/512);
-	JoystickReport->Brake  = (511-c.y)*(32768/512);
+	JoystickReport->Clutch = (AdcValues.clutch-512)*(32768/512);
+	JoystickReport->Brake  = (AdcValues.brake-512 )*(32768/512);
+	JoystickReport->Accel  = (AdcValues.accel-512 )*(32768/512);
+#endif
+
+#if (FAKE_PEDALS == 1)
+	JoystickReport->Clutch = (AdcValues.x-512)*(32768/512);
+	JoystickReport->Brake  = (511-AdcValues.y)*(32768/512);
 
 	// count the buttons pressed
 	uint8_t bits = JoystickReport->Buttons[1];

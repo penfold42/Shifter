@@ -32,16 +32,18 @@
 #endif
 
 #define BUTTON_MODE_AND_CLOCK_WAIT 10
-#define NUMBER_OF_SHIFT_REGISTER_BUTTONS 16
 
+// turned off if in reverse
 #define G25_LED_PORT PORTE
 #define G25_LED_BIT 6				// PortE.6 = Arduino 7
 #define G25_LED_IO DDRE
 
+// blink every second when USB connected
 #define TX_LED_PORT PORTD
 #define TX_LED_BIT 5                           // PortD.5 = Arduino NO!
 #define TX_LED_IO DDRD
 
+// blink every 100 HID reports
 #define RX_LED_PORT PORTB
 #define RX_LED_BIT 0                           // PortB.0 = Arduino 17?
 #define RX_LED_IO DDRB
@@ -51,8 +53,13 @@
 #define CLUTCH_ADC 5				// PortF.5 = Arduino 20/A2
 #define BRAKE_ADC 4				// PortF.4 = Arduino 21/A3
 #define ACCEL_ADC 8				// PortD.4 = Arduino 4/A6
-#define ADC_TO_IN DDRF &= ~(0b11110000); DDRD &= ~(0b00010000);
-
+// DDR to in.. pullups on pedals?
+#define ADC_IO_SETUP  {		\
+  DDRF  &= ~(0b11110000);	\
+  DDRD  &= ~(0b00010000);	\
+  PORTF |=  (0b00110000);	\
+  PORTD |=  (0b00010000);	\
+}
 
 #define neutral		0
 #define first		1
@@ -68,9 +75,14 @@
 typedef struct {
   uint16_t x;
   uint16_t y;
+  uint16_t clutch;
+  uint16_t brake;
+  uint16_t accel;
 } g27coordinates;
 
 void g27_initialize_io(void);
+
+void update_adc_values(void);
 
 uint16_t read_buttons(void);
 

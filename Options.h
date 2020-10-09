@@ -9,7 +9,7 @@
 #define SHIFTER_JOY 1
 
 // Process and send clutch, brake, accelerator pedals
-#define USE_PEDALS 0
+#define USE_PEDALS 1
 
 // USB Product String YOU NEED THE L!
 #define USB_NAME L"G25 Shifter"
