@@ -128,6 +128,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 	USB_JoystickReport_Data_t* JoystickReport = (USB_JoystickReport_Data_t*)ReportData;
 
+// Process the buttons on the shift register
 	uint16_t buttons = read_buttons();
 	uint8_t Red4Buttons = (buttons >> 4) & 0x0f;
 	uint8_t Top4Buttons = (buttons >> 8) & 0x0f;
@@ -147,7 +148,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	JoystickReport->Buttons[1] = (Red4Buttons<<4) | Top4Buttons;
 	JoystickReport->Buttons[2] = 0 | (buttons & 0xf);
 
-	uint8_t shifter = read_selected_gear(isShifterPressed, isSequential);
+	SelectedGear_t shifter = read_selected_gear(isShifterPressed, isSequential);
 	if (shifter == shiftUp) {
 		JoystickReport->Buttons[2] |= 0x10;
 	} else if (shifter == shiftDown) {
@@ -158,9 +159,7 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 	}
 
 
-
 // Process and send clutch, brake, accelerator pedals
-
 #if (SHIFTER_JOY == 1)
 	// scale 10bit adc to 16bit joystick axes (and flip Y)
 	JoystickReport->Xaxis  = (AdcValues.x-512)*(32768/512);

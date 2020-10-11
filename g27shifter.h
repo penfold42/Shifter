@@ -61,16 +61,18 @@
   PORTD |=  (0b00010000);	\
 }
 
-#define neutral		0
-#define first		1
-#define second		2
-#define third		3
-#define fourth		4
-#define fifth		5
-#define sixth		6
-#define reverse		7
-#define shiftUp		8
-#define shiftDown	9
+typedef enum SelectedGear {
+	neutral,
+	first,
+	second,
+	third,
+	fourth,
+	fifth,
+	sixth,
+	reverse,
+	shiftUp,
+	shiftDown
+} SelectedGear_t;
 
 typedef struct {
   uint16_t x;

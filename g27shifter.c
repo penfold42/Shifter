@@ -117,7 +117,7 @@ void update_adc_values(void) {
 #endif
 }
 
-static inline uint8_t decode_Sequential(g27coordinates c, bool isStickDown) {
+static inline SelectedGear_t decode_Sequential(g27coordinates c, bool isStickDown) {
       if(c.y > STICK_Y_SEQ_3){
         return shiftDown;
       }
@@ -129,7 +129,7 @@ static inline uint8_t decode_Sequential(g27coordinates c, bool isStickDown) {
       return neutral;
 }
 
-static inline uint8_t decode_Hpattern(g27coordinates c, bool isStickDown) {
+static inline SelectedGear_t decode_Hpattern(g27coordinates c, bool isStickDown) {
 
       if(c.x < STICK_X_12) {
         if(c.y > STICK_Y_135){
@@ -163,9 +163,9 @@ static inline uint8_t decode_Hpattern(g27coordinates c, bool isStickDown) {
       return neutral;
 }
 
-uint8_t read_selected_gear(bool isStickDown, bool isSequential){
+SelectedGear_t read_selected_gear(bool isStickDown, bool isSequential){
   update_adc_values();
-  uint8_t selectedGear = 0;
+  SelectedGear_t selectedGear = neutral;
   if (isSequential) {
     selectedGear = decode_Sequential(AdcValues, isStickDown);
   } else {
