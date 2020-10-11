@@ -7,36 +7,18 @@
 
 #include "Options.h"
 
-#if (HWVARIANT == 1)
+#define SPI_SRMODE_PIN 6		// PortB.6 = Arduino 10
+#define SPI_MISO_PIN 3			// PortB.3 = Arduino 14
+#define SPI_MOSI_PIN 2			// PortB.2 = Arduino 16
+#define SPI_CLOCK_PIN 1			// PortB.1 = Arduino 15
 
-#define BUTTON_SRMODE_PIN 0			// PortD.0 = Arduino 3
-#define BUTTON_DATA_PIN 4			// PortD.4 = Arduino 4
-#define BUTTON_CLOCK_PIN 1			// PortD.1 = Arduino 2
-
-#define BUTTON_PORT PORTD
-#define BUTTON_PIN PIND
-#define BUTTON_IO DDRD
-
-#elif (HWVARIANT == 2)
-
-#define BUTTON_SRMODE_PIN 6			// PortB.6 = Arduino 10
-#define BUTTON_DATA_PIN 3			// PortB.3 = Arduino 14
-#define BUTTON_CLOCK_PIN 1			// PortB.1 = Arduino 15
-
-#define BUTTON_PORT PORTB
-#define BUTTON_PIN PINB
-#define BUTTON_IO DDRB
-
-#else
-#error invalid HWVARIANT
-#endif
+#define SPI_PORT PORTB
+#define SPI_PIN PINB
+#define SPI_IO DDRB
+#define G25_LED_PORT SPI_PORT
+#define G25_LED_BIT SPI_MOSI_PIN
 
 #define BUTTON_MODE_AND_CLOCK_WAIT 10
-
-// turned off if in reverse
-#define G25_LED_PORT PORTE
-#define G25_LED_BIT 6				// PortE.6 = Arduino 7
-#define G25_LED_IO DDRE
 
 // blink every second when USB connected
 #define TX_LED_PORT PORTD

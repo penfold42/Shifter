@@ -1,5 +1,10 @@
 #include "g27shifter.h"
 
+/* yay for global variables....
+ * use this as a global as ADC reads are expensive
+ */
+g27coordinates AdcValues;
+
 // Calibration settings
 uint16_t STICK_X_12	= 380;
 uint16_t STICK_X_56R	= 650;        // 550;
@@ -16,11 +21,11 @@ uint16_t   BRAKE_MIN = 0; uint16_t   BRAKE_MAX = 1023;
 uint16_t   ACCEL_MIN = 0; uint16_t   ACCEL_MAX = 1023;
 
 void g27_initialize_io() {
-  BUTTON_IO |= ( (1 << BUTTON_SRMODE_PIN) | (1 << BUTTON_CLOCK_PIN) );
-  BUTTON_PORT |= (1 << BUTTON_DATA_PIN);	// pullup on data pin
+  SPI_IO |= ( (1 << SPI_SRMODE_PIN) | (1 << SPI_CLOCK_PIN) | (1 << SPI_MOSI_PIN) );
+  SPI_PORT |= (1 << SPI_MISO_PIN);	// pullup on data pin
 
-  G25_LED_IO |= (1 << G25_LED_BIT);
-  G25_LED_PORT |= (1 << G25_LED_BIT);
+  G25_LED_PORT &= ~(1 << G25_LED_BIT);	// led on
+
   RX_LED_IO |= (1 << RX_LED_BIT);
   RX_LED_PORT |= (1 << RX_LED_BIT);
   TX_LED_IO |= (1 << TX_LED_BIT);
@@ -36,8 +41,8 @@ void g27_initialize_io() {
    4 M/s was too fast - had corruption
    2 M/s was ok
    1 M/s was ok
-
 */
+
   SPSR  = (1<<SPI2X);			// double speed
 
   SPCR  = (0<<SPIE) | (1<<SPE)		// no interrupts
@@ -51,26 +56,37 @@ void g27_initialize_io() {
 uint16_t read_buttons() {
   uint16_t buttonResult = 0;
 
+  // preserve state of MOSI pin
+  uint8_t txdata = 0x00;
+  if (SPI_PORT & (1<<SPI_MOSI_PIN)) txdata = 0xff;
+
+  // enable SPI
+  SPCR |= (1<<SPE);
+
   // blink the LED every SPI access
-  static int countMS;
-  if (++countMS > 100) {
-    countMS = 0;
+  static int counter;
+  if (++counter > 100) {
+    counter = 0;
     RX_LED_PORT &= ~(1<<RX_LED_BIT);
   }
 
   // latch shift registers
-  BUTTON_PORT &= ~(1 << BUTTON_SRMODE_PIN);
+  SPI_PORT &= ~(1 << SPI_SRMODE_PIN);
   _delay_us(BUTTON_MODE_AND_CLOCK_WAIT);
-  BUTTON_PORT |= (1 << BUTTON_SRMODE_PIN);
+  SPI_PORT |= (1 << SPI_SRMODE_PIN);
 
-  SPDR = 0;			// do a transfer
+  SPDR = txdata;		// do a transfer
   while(! (SPSR & (1<<SPIF)) );	// wait for it to finish
   buttonResult = SPDR;		// read the byte from 1st SR
-  SPDR = 0;			// do a transfer
+  SPDR = txdata;		// do a transfer
   while(! (SPSR & (1<<SPIF)) );	// wait for it to finish
   buttonResult |= (SPDR<<8);	// read the byte from 2nd SR
 
   RX_LED_PORT |= (1<<RX_LED_BIT);
+
+  // disable SPI
+  SPCR &= ~(1<<SPE);
+
   return buttonResult;
 }
 
@@ -90,11 +106,6 @@ static inline uint16_t read_adc(uint8_t mux) {
   ADCSRA = ADCSRA & ~(1 << ADEN);  // Disable ADC, ADC must be disabled to change MUX
   return result;
 }
-
-/* yay for global variables....
- * use this as a global as ADC reads are expensive
- */
-g27coordinates AdcValues;
 
 void update_adc_values(void) {
   AdcValues.x      = read_adc(STICK_X_ADC);

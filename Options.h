@@ -2,9 +2,6 @@
 #ifndef _OPTIONS_H_
 #define _OPTIONS_H_
 
-// What hardware pinout ?
-#define HWVARIANT 2
-
 // Send Shifter as analog joystick (as well as button presses)
 #define SHIFTER_JOY 1
 
