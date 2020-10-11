@@ -2,54 +2,56 @@ Logitech G25/27 Shifter to AVR  USB
 ==
 This project is for using a G25/27 shifter connected directly to your computer as a HID device without the need for the main G25/27 unit.
 
+Initial support is alo provided for attaching the G25 (and i assume G27) pedal unit.
+
+In Options.h you can enable/disable options to:
+- Send Shifter as analog joystick (as well as button presses)
+`#define SHIFTER_JOY 1`
+
+- Process and send clutch, brake, accelerator pedals
+`#define USE_PEDALS 1`
+
 ## Setup ##
 
 This is the pinout of the DSUB9 coming out of the G27 shifter (female)
 
-PIN   | G27 Purpose                          | G27 Wire Color
-------|--------------                        |------
-1     | Clock                                | Purple
-2     | Serial Button Data                   | Gray
-3     | Shift Register Mode Parallel/Serial  | Yellow
-4     | X Axis                               | Orange
-5     | Ground LEDs                          | White
-6     | Ground Logic                         | Black
-7     | +5V Sense                            | Red
-8     | Y Axis                               | Green
-9     | +5V Supply                           | Red
+PIN   | G27 Purpose                          | G27 Wire Color    | MCU/Arduino
+------|--------------                        |------             |----------------
+1     | Clock                                | Purple            | PortB.1 = Arduino 15
+2     | Serial Button Data                   | Gray              | PortB.3 = Arduino 14
+3     | Shift Register Mode Parallel/Serial  | Yellow            | PortB.6 = Arduino 10
+4     | X Axis                               | Orange            | PortF.7 = Arduino 18/A0
+5     | Ground LEDs                          | White             | PortB.2 = Arduino 16
+6     | Ground Logic                         | Black             | GND
+7     | +5V Sense                            | Red               |
+8     | Y Axis                               | Green             | PortF.6 = Arduino 19/A1
+9     | +5V Supply                           | Red               | VCC
+
+
 
 This is the pinout of the DSUB9 coming out of the G25 shifter (female)
 
-PIN   | G25 Purpose                          | G25 Wire Color
-------|--------------                        |------
-1     | +5 Sense                             | 
-2     | Serial Button Data                   | Gray
-3     | Shift Register Mode Parallel/Serial  | Yellow
-4     | X Axis                               | Orange
-5     | Power LED                            | Red
-6     | Ground Logic                         | Black
-7     | Clock                                | Purple
-8     | Y Axis                               | Green
-9     | +5V Supply                           | Black
+PIN   | G25 Purpose                          | G25 Wire Color    | MCU/Arduino
+------|--------------                        |------             |---------------
+1     | +5 Sense                             | ??                |
+2     | Serial Button Data                   | Gray              | PortB.3 = Arduino 14
+3     | Shift Register Mode Parallel/Serial  | Yellow            | PortB.6 = Arduino 10
+4     | X Axis                               | Orange            | PortF.7 = Arduino 18/A0
+5     | Ground LEDs                          | Red               | PortB.2 = Arduino 16
+6     | Ground Logic                         | Black             | GND
+7     | Clock                                | Purple            | PortB.1 = Arduino 15
+8     | Y Axis                               | Green             | PortF.6 = Arduino 19/A1
+9     | +5V Supply                           | Black             | VCC
 
 The first step is to wire the shfiter I/O.
 
-The inputs used by the project are defined in **g27shifter.h**. The button I/Os are assumed to all be on the same AVR port, these are defined by the **BUTTON_PIN**,** BUTTON_PORT** and **BUTTON_IO**.
-
-Next up is defining which pin **BUTTON_SHIFT_REGISTER_MODE_PIN**, **BUTTON_DATA_PIN**, and **BUTTON_CLOCK_PIN** is on.
+The inputs used by the project are defined in **g27shifter.h**.
+As this now uses the SPI bus, you cannot change the GPIO pins that are used for the shift register communication.
 
 After that is connecting the X and Y pins to an ADC port each, these are defined by **STICK_X_ADC** and **STICK_Y_ADC**.
 
-Next is powering the logic circuitry, connect **pin 9** to +5V or VCC and **pin 6** to ground. I recommend not connecting **pin 5** since that will power the leds and in turn reduce the voltage over the X and Y pots when powering from USB, doing this with an external power supply should work better.
-
-Shifter Purpose                  | Atmega pin   | Arduino pin
----------------------------------|--------------|-------------
-BUTTON_SHIFT_REGISTER_MODE_PIN   | PortD.0      | Arduino 3
-BUTTON_DATA_PIN                  | PortD.4      | Arduino 4
-BUTTON_CLOCK_PIN                 | PortD.1      | Arduino 2
-STICK_X_ADC                      | PortF.7      | Arduino A0
-STICK_Y_ADC                      | PortF.6      | Arduino A1
-LED_BIT                          | PortE.6      | Arduino 7
+Next is powering the logic circuitry, connect **pin 9** to +5V or VCC and **pin 6** to ground.
+I recommend not connecting **pin 5** since that will power the leds and in turn reduce the voltage over the X and Y pots when powering from USB, doing this with an external power supply should work better.
 
 
 ## Build
@@ -85,3 +87,6 @@ The X and Y pins are simply potentiometers that tells how the stick is positione
 Showing that 1 and 9 are shorted in a G25
 
 ![image](http://i.imgur.com/csH44Uz.jpg?1)
+
+### G25 pedal pinouts ###
+![image](https://www.lfs.net/attachment/128450)
