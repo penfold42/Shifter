@@ -15,7 +15,7 @@ In Options.h you can enable/disable options to:
 
 This is the pinout of the DSUB9 coming out of the G27 shifter (female)
 
-PIN   | G27 Purpose                          | G27 Wire Color    | MCU/Arduino
+PIN   | G27 Purpose                          | G27 Wire Color    | ATmega32u4/Arduino
 ------|--------------                        |------             |----------------
 1     | Clock                                | Purple            | PortB.1 = Arduino 15
 2     | Serial Button Data                   | Gray              | PortB.3 = Arduino 14
@@ -31,7 +31,7 @@ PIN   | G27 Purpose                          | G27 Wire Color    | MCU/Arduino
 
 This is the pinout of the DSUB9 coming out of the G25 shifter (female)
 
-PIN   | G25 Purpose                          | G25 Wire Color    | MCU/Arduino
+PIN   | G25 Purpose                          | G25 Wire Color    | ATmega32u4/Arduino
 ------|--------------                        |------             |---------------
 1     | +5 Sense                             | ??                |
 2     | Serial Button Data                   | Gray              | PortB.3 = Arduino 14
@@ -43,6 +43,20 @@ PIN   | G25 Purpose                          | G25 Wire Color    | MCU/Arduino
 8     | Y Axis                               | Green             | PortF.6 = Arduino 19/A1
 9     | +5V Supply                           | Black             | VCC
 
+This is the pinout of the DSUB9 coming out of the G25 pedals (MALE)
+
+PIN   | Pedal Purpose                        | Wire Color    | ATmega32u4/Arduino
+------|--------------                        |------         |---------------
+1     | +5 Supply                            | ??            | VCC
+2     | Accelerator Pedlal Potentiometer     | ??            | PortD.4 = Arduino  4/A6
+3     | Brake Pedal Potentiometer            | ??            | PortF.4 = Arduino 21/A3
+4     | Clutch Pedal Potentiometer           | ??            | PortF.5 = Arduino 20/A2
+5     |                                      | ??            | 
+6     | Ground Logic                         | ??            | GND
+7     |                                      | ??            | 
+8     |                                      | ??            | 
+9     |                                      | ??            | 
+
 The first step is to wire the shfiter I/O.
 
 The inputs used by the project are defined in **g27shifter.h**.
@@ -51,7 +65,8 @@ As this now uses the SPI bus, you cannot change the GPIO pins that are used for 
 After that is connecting the X and Y pins to an ADC port each, these are defined by **STICK_X_ADC** and **STICK_Y_ADC**.
 
 Next is powering the logic circuitry, connect **pin 9** to +5V or VCC and **pin 6** to ground.
-I recommend not connecting **pin 5** since that will power the leds and in turn reduce the voltage over the X and Y pots when powering from USB, doing this with an external power supply should work better.
+
+Last is connecting **pin 5** to enable the power LED on the shifter.
 
 
 ## Build
@@ -76,10 +91,10 @@ To make this compatible with a G25 shifter move clock from pin 1 to 7 going into
 
 Since the G27 doesn't have the sequential mode, those buttons will not activate.
 
-##Hardware operation
+## Hardware operation
 The X and Y pins are simply potentiometers that tells how the stick is positioned. The buttons work through parallel in serial out shift registers. Pulling the mode pin low then holding it high latches the current input pins so that they can be sequentially read through the serial output. The shift register advances to the next value on the falling edge on the clock pin.
 
-##Schematics
+## Schematics
 ### G25 circuitry ###
 ![image](http://i.imgur.com/W0HSzhh.png?1)
 
