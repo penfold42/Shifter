@@ -46,13 +46,13 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 		HID_RI_COLLECTION(8, 0x00),
 			HID_RI_USAGE_PAGE(8, 0x01),
 #if (SHIFTER_JOY == 1)
-			HID_RI_USAGE(8, 0x30),	// X axis
-			HID_RI_USAGE(8, 0x31),	// Y axis
+			HID_RI_USAGE(8, 0x30),	// shifter X axis
+			HID_RI_USAGE(8, 0x31),	// shifter Y axis
 #endif
 #if (USE_PEDALS == 1)
-			HID_RI_USAGE(8, 0x36),	// slider
-			HID_RI_USAGE(8, 0x36),	// slider
-			HID_RI_USAGE(8, 0x36),	// slider
+			HID_RI_USAGE(8, 0x36),	// slider for clutch pedal
+			HID_RI_USAGE(8, 0x36),	// slider for brake pedal
+			HID_RI_USAGE(8, 0x36),	// slider for accelerator
 #endif
 			HID_RI_USAGE_MINIMUM(8, 0x01),
 			HID_RI_USAGE_MAXIMUM(8, Axes),

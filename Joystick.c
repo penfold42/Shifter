@@ -168,8 +168,8 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 #if (USE_PEDALS == 1)
 	JoystickReport->Clutch = (AdcValues.clutch-512)*(32768/512);
-	JoystickReport->Brake  = (AdcValues.brake-512 )*(32768/512);
-	JoystickReport->Accel  = (AdcValues.accel-512 )*(32768/512);
+	JoystickReport->Brake  = ( AdcValues.brake-512)*(32768/512);
+	JoystickReport->Accel  = ( AdcValues.accel-512)*(32768/512);
 #endif
 
 #if (FAKE_PEDALS == 1)

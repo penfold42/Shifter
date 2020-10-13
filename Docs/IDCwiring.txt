@@ -1,0 +1,13 @@
+wiing in IDC cable order
+
+PIN	PIN	G25				
+1		+5V Sense		AVR reset
+	6	Ground Logic		GND
+2		Button SR Data		Arduino 14
+	7	Button SR Clock		Arduino 15
+3		Button SR Mode		Ardiuno 10
+	8	Stick Y Axis		Arduino 19/A1
+4		Stick X Axis		Arduino 18/A0
+	9	+5V Supply		VCC
+5		Ground LEDs		Ardiuno 16 
+
