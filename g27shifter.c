@@ -5,6 +5,10 @@
  */
 g27coordinates AdcValues;
 
+#if (USE_PEDALS == 1)
+extern bool Pedals_Enabled;
+#endif
+
 // Calibration settings
 uint16_t STICK_X_12	= 380;
 uint16_t STICK_X_56R	= 650;        // 550;
@@ -56,19 +60,12 @@ void g27_initialize_io() {
 uint16_t read_buttons() {
   uint16_t buttonResult = 0;
 
-  // preserve state of MOSI pin
+  // preserve state of MOSI pin	(G25 power LED)
   uint8_t txdata = 0x00;
   if (SPI_PORT & (1<<SPI_MOSI_PIN)) txdata = 0xff;
 
   // enable SPI
   SPCR |= (1<<SPE);
-
-  // blink the LED every SPI access
-  static int counter;
-  if (++counter > 100) {
-    counter = 0;
-    RX_LED_PORT &= ~(1<<RX_LED_BIT);
-  }
 
   // latch shift registers
   SPI_PORT &= ~(1 << SPI_SRMODE_PIN);
@@ -81,8 +78,6 @@ uint16_t read_buttons() {
   SPDR = txdata;		// do a transfer
   while(! (SPSR & (1<<SPIF)) );	// wait for it to finish
   buttonResult |= (SPDR<<8);	// read the byte from 2nd SR
-
-  RX_LED_PORT |= (1<<RX_LED_BIT);
 
   // disable SPI
   SPCR &= ~(1<<SPE);
@@ -116,15 +111,17 @@ void update_adc_values(void) {
   if (AdcValues.y <= STICK_Y_MIN) STICK_Y_MIN = AdcValues.y;
 
 #if (USE_PEDALS == 1)
-  AdcValues.clutch = read_adc(CLUTCH_ADC);
-  AdcValues.brake  = read_adc(BRAKE_ADC);
-  AdcValues.accel  = read_adc(ACCEL_ADC);
-  if (AdcValues.clutch >= CLUTCH_MAX) CLUTCH_MAX = AdcValues.clutch;
-  if (AdcValues.clutch <= CLUTCH_MIN) CLUTCH_MIN = AdcValues.clutch;
-  if (AdcValues.brake  >= BRAKE_MAX)  BRAKE_MAX  = AdcValues.brake;
-  if (AdcValues.brake  <= BRAKE_MIN)  BRAKE_MIN  = AdcValues.brake;
-  if (AdcValues.accel  >= ACCEL_MAX)  ACCEL_MAX  = AdcValues.accel;
-  if (AdcValues.accel  <= ACCEL_MIN)  ACCEL_MIN  = AdcValues.accel;
+  if (Pedals_Enabled) {
+    AdcValues.clutch = read_adc(CLUTCH_ADC);
+    AdcValues.brake  = read_adc(BRAKE_ADC);
+    AdcValues.accel  = read_adc(ACCEL_ADC);
+    if (AdcValues.clutch >= CLUTCH_MAX) CLUTCH_MAX = AdcValues.clutch;
+    if (AdcValues.clutch <= CLUTCH_MIN) CLUTCH_MIN = AdcValues.clutch;
+    if (AdcValues.brake  >= BRAKE_MAX)  BRAKE_MAX  = AdcValues.brake;
+    if (AdcValues.brake  <= BRAKE_MIN)  BRAKE_MIN  = AdcValues.brake;
+    if (AdcValues.accel  >= ACCEL_MAX)  ACCEL_MAX  = AdcValues.accel;
+    if (AdcValues.accel  <= ACCEL_MIN)  ACCEL_MIN  = AdcValues.accel;
+  }
 #endif
 }
 

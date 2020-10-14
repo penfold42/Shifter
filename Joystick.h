@@ -21,6 +21,8 @@
 		typedef struct
 		{
 			uint8_t Buttons[3];
+			uint8_t Hat;
+
 #if (SHIFTER_JOY == 1)
 			uint16_t Xaxis;
 			uint16_t Yaxis;
@@ -31,11 +33,11 @@
 			uint16_t Brake;
 			uint16_t Accel;
 #endif
-			uint8_t Hat;
 		} USB_JoystickReport_Data_t;
 
 	/* Function Prototypes: */
 		void SetupHardware(void);
+		void CheckButtons(void);
 
 		void EVENT_USB_Device_Connect(void);
 		void EVENT_USB_Device_Disconnect(void);

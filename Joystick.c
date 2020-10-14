@@ -26,10 +26,27 @@ USB_ClassInfo_HID_Device_t Joystick_HID_Interface =
 	};
 
 
-/* yay for global variables....
- * use this as a global as ADC reads are expensive
- */
-extern g27coordinates AdcValues;
+// yay for global variables....
+
+extern g27coordinates AdcValues;	// use a global as ADC reads are expensive
+
+uint16_t buttons;			// raw shift register button data
+uint8_t Red4Buttons;			// the row of 4 red buttons
+uint8_t LastRed4Buttons;
+
+uint8_t Top4Buttons;			// triangle, circle, square, cross
+uint8_t LastTop4Buttons;
+
+uint8_t DPad4Buttons;			// up down left right
+uint8_t LastDPad4Buttons;
+
+#if (SHIFTER_JOY == 1)
+bool ShifterJoy_Enabled = true;
+#endif
+
+#if (USE_PEDALS == 1)
+bool Pedals_Enabled = true;
+#endif
 
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
@@ -40,12 +57,71 @@ int main(void)
 
 	GlobalInterruptEnable();
 
+#if (SHIFTER_JOY == 1)
+	ShifterJoy_Enabled ? (TX_LED_PORT &= ~(1<<TX_LED_BIT)) : (TX_LED_PORT |= (1<<TX_LED_BIT));
+#endif
+#if (USE_PEDALS == 1)
+	Pedals_Enabled     ? (RX_LED_PORT &= ~(1<<RX_LED_BIT)) : (RX_LED_PORT |= (1<<RX_LED_BIT));
+#endif
+
 	for (;;)
 	{
 		HID_Device_USBTask(&Joystick_HID_Interface);
 		USB_USBTask();
+		CheckButtons();
 	}
 }
+
+void CheckButtons(void)
+{
+	static uint16_t CountDown1Sec = 0;		// approx 1 second countdown
+
+	LastRed4Buttons = Red4Buttons;
+	LastTop4Buttons = Top4Buttons;
+	LastDPad4Buttons = DPad4Buttons;
+
+	buttons = read_buttons();
+	Red4Buttons = (buttons >> RED4_BITS) & 0x0f;
+	Top4Buttons = (buttons >> TOP4_BITS) & 0x0f;
+	DPad4Buttons = (buttons >> DPAD_BITS) & 0x0f;
+
+	// hold all top 4 buttons for config changes
+	if (Top4Buttons == ( TRIANGLE | CIRCLE | SQUARE | CROSS ) ) {
+		// L3 toggles shifter as analog joystick
+#if (SHIFTER_JOY == 1)
+		if ( (LastRed4Buttons == 0) && (Red4Buttons == L3 ) ) {
+			ShifterJoy_Enabled = !ShifterJoy_Enabled;
+			USB_Detach();
+			CountDown1Sec = 16821;
+			// update led
+			ShifterJoy_Enabled	? (TX_LED_PORT &= ~(1<<TX_LED_BIT))
+						: (TX_LED_PORT |= (1<<TX_LED_BIT));
+
+		}
+#endif
+
+		// R3 toggles pedals enable/disable
+#if (USE_PEDALS == 1)
+		if ( (LastRed4Buttons == 0) && (Red4Buttons == R3 ) ) {
+			Pedals_Enabled = !Pedals_Enabled;
+			USB_Detach();
+			CountDown1Sec = 16821;
+			// update led
+			Pedals_Enabled	? (RX_LED_PORT &= ~(1<<RX_LED_BIT))
+					: (RX_LED_PORT |= (1<<RX_LED_BIT));
+		}
+#endif
+	}
+
+	// check delay counter for USB_Attach
+	if (CountDown1Sec--) {
+		if (CountDown1Sec==0) {
+			USB_Attach();
+			USB_USBTask();
+		}
+	}
+}
+
 
 void SetupHardware(void)
 {
@@ -106,7 +182,7 @@ void EVENT_USB_Device_StartOfFrame(void)
 
 	static int countMS;
 	if (++countMS > 1000) countMS = 0;
-	(countMS == 0) ? (TX_LED_PORT &= ~(1<<TX_LED_BIT)) : (TX_LED_PORT |= (1<<TX_LED_BIT));
+//	(countMS == 0) ? (TX_LED_PORT &= ~(1<<TX_LED_BIT)) : (TX_LED_PORT |= (1<<TX_LED_BIT));
 //	(countMS == 100) ? (RX_LED_PORT &= ~(1<<RX_LED_BIT)) : (RX_LED_PORT |= (1<<RX_LED_BIT));
 }
 
@@ -128,20 +204,14 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 	USB_JoystickReport_Data_t* JoystickReport = (USB_JoystickReport_Data_t*)ReportData;
 
-// Process the buttons on the shift register
-	uint16_t buttons = read_buttons();
-	uint8_t Red4Buttons = (buttons >> 4) & 0x0f;
-	uint8_t Top4Buttons = (buttons >> 8) & 0x0f;
-	uint8_t DPad4Buttons = (buttons >> 12) & 0x0f;
-
-	bool isShifterPressed = ((buttons & (1 << 1)) == (1<< 1)) & 1;
-	bool isSequential = ((buttons & (1 << 3)) == (1<< 3)) & 1;
+	bool isShifterPressed = (buttons & PRESSED);
+	bool isSequential     = (buttons & SEQUENTIAL);
 
 	// extinguish power LED when in reverse
 	if (isShifterPressed) {
-		G25_LED_PORT |= (1 << G25_LED_BIT);
+		G25_LED_PORT |= (1 << G25_LED_BIT);	// led off
 	} else {
-		G25_LED_PORT &= ~(1 << G25_LED_BIT);
+		G25_LED_PORT &= ~(1 << G25_LED_BIT);	// led on
 	}
 
 	JoystickReport->Buttons[0] = (isSequential * 0x80); // Sequential to top bit
@@ -161,15 +231,26 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 
 // Process and send clutch, brake, accelerator pedals
 #if (SHIFTER_JOY == 1)
-	// scale 10bit adc to 16bit joystick axes (and flip Y)
-	JoystickReport->Xaxis  = (AdcValues.x-512)*(32768/512);
-	JoystickReport->Yaxis  = (511-AdcValues.y)*(32768/512);
+	if ( ShifterJoy_Enabled ) {
+		// scale 10bit adc to 16bit joystick axes (and flip Y)
+		JoystickReport->Xaxis  = (AdcValues.x-512)*(32768/512);
+		JoystickReport->Yaxis  = (511-AdcValues.y)*(32768/512);
+	} else {
+		JoystickReport->Xaxis  = 0;
+		JoystickReport->Yaxis  = 0;
+	}
 #endif
 
 #if (USE_PEDALS == 1)
-	JoystickReport->Clutch = (AdcValues.clutch-512)*(32768/512);
-	JoystickReport->Brake  = ( AdcValues.brake-512)*(32768/512);
-	JoystickReport->Accel  = ( AdcValues.accel-512)*(32768/512);
+	if (Pedals_Enabled ) {
+		JoystickReport->Clutch = (AdcValues.clutch-512)*(32768/512);
+		JoystickReport->Brake  = ( AdcValues.brake-512)*(32768/512);
+		JoystickReport->Accel  = ( AdcValues.accel-512)*(32768/512);
+	} else {
+		JoystickReport->Clutch = 0;
+		JoystickReport->Brake  = 0;
+		JoystickReport->Accel  = 0;
+	}
 #endif
 
 #if (FAKE_PEDALS == 1)
@@ -187,28 +268,28 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 #endif
 
 	switch (DPad4Buttons) {
-		case 0b1000:	// N
+		case NORTH:
 			JoystickReport->Hat = 1;
 			break;
-		case 0b1001:	// NE
+		case (NORTH|EAST):
 			JoystickReport->Hat = 2;
 			break;
-		case 0b0001:	// E
+		case EAST:
 			JoystickReport->Hat = 3;
 			break;
-		case 0b0101:	// SE
+		case (SOUTH|EAST):
 			JoystickReport->Hat = 4;
 			break;
-		case 0b0100:	// S
+		case SOUTH:
 			JoystickReport->Hat = 5;
 			break;
-		case 0b0110:	// SW
+		case (SOUTH|WEST):
 			JoystickReport->Hat = 6;
 			break;
-		case 0b0010:	// W
+		case WEST:
 			JoystickReport->Hat = 7;
 			break;
-		case 0b1010:	// NW
+		case (NORTH|WEST):
 			JoystickReport->Hat = 8;
 			break;
 		default:

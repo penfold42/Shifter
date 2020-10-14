@@ -22,7 +22,8 @@
  *  the device will send, and what it may be sent back from the host. Refer to the HID specification for
  *  more details on HID report descriptors.
  */
-const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
+//const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
+USB_Descriptor_HIDReport_Datatype_t JoystickReport[] =
 {
 	HID_RI_USAGE_PAGE(8, 0x01),
 	HID_RI_USAGE(8, 0x04),
@@ -39,6 +40,22 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 			HID_RI_REPORT_SIZE(8, 0x01),
 			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
 
+		HID_RI_END_COLLECTION(0),
+
+		// Hat switch
+		HID_RI_COLLECTION(8, 0x00),
+			HID_RI_USAGE_PAGE(8, 0x01),
+			HID_RI_USAGE(8, 0x39),
+			HID_RI_LOGICAL_MINIMUM(16, 1),
+			HID_RI_LOGICAL_MAXIMUM(16, 8),
+			HID_RI_REPORT_COUNT(8, 1),
+			HID_RI_REPORT_SIZE(8, 4),
+			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE ),
+
+			// padding for byte aligned
+			HID_RI_REPORT_COUNT(8, 1),
+			HID_RI_REPORT_SIZE(8, 4),
+			HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
 		HID_RI_END_COLLECTION(0),
 
 #if Axes > 0
@@ -64,21 +81,6 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
 		HID_RI_END_COLLECTION(0),
 #endif
 
-		// Hat switch
-		HID_RI_COLLECTION(8, 0x00),
-			HID_RI_USAGE_PAGE(8, 0x01),
-			HID_RI_USAGE(8, 0x39),
-			HID_RI_LOGICAL_MINIMUM(16, 1),
-			HID_RI_LOGICAL_MAXIMUM(16, 8),
-			HID_RI_REPORT_COUNT(8, 1),
-			HID_RI_REPORT_SIZE(8, 4),
-			HID_RI_INPUT(8, HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE ),
-
-			// padding for byte aligned
-			HID_RI_REPORT_COUNT(8, 1),
-			HID_RI_REPORT_SIZE(8, 4),
-			HID_RI_INPUT(8, HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
-		HID_RI_END_COLLECTION(0),
 
 	HID_RI_END_COLLECTION(0)
 };
@@ -88,7 +90,7 @@ const USB_Descriptor_HIDReport_Datatype_t PROGMEM JoystickReport[] =
  *  number of device configurations. The descriptor is read out by the USB host when the enumeration
  *  process begins.
  */
-const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
+const USB_Descriptor_Device_t DeviceDescriptor =
 {
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
@@ -115,7 +117,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
  *  and endpoints. The descriptor is read out by the USB host during the enumeration process when selecting
  *  a configuration so that the host may correctly communicate with the USB device.
  */
-const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
+const USB_Descriptor_Configuration_t ConfigurationDescriptor =
 {
 	.Config =
 		{
@@ -174,20 +176,19 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
  *  the string descriptor with index 0 (the first index). It is actually an array of 16-bit integers, which indicate
  *  via the language ID table available at USB.org what languages the device supports for its string descriptors.
  */
-const USB_Descriptor_String_t PROGMEM LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
+const USB_Descriptor_String_t LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGUAGE_ID_ENG);
 
 /** Manufacturer descriptor string. This is a Unicode string containing the manufacturer's details in human readable
  *  form, and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
  *  Descriptor.
  */
-const USB_Descriptor_String_t PROGMEM ManufacturerString = USB_STRING_DESCRIPTOR(L"Chris Jansson");
+const USB_Descriptor_String_t ManufacturerString = USB_STRING_DESCRIPTOR(L"Chris Jansson");
 
 /** Product descriptor string. This is a Unicode string containing the product's details in human readable form,
  *  and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
  *  Descriptor.
  */
-//const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(L"G27 Shifter");
-const USB_Descriptor_String_t PROGMEM ProductString = USB_STRING_DESCRIPTOR(USB_NAME);
+const USB_Descriptor_String_t ProductString = USB_STRING_DESCRIPTOR(USB_NAME);
 
 /** This function is called by the library when in device mode, and must be overridden (see library "USB Descriptors"
  *  documentation) by the application code so that the address and size of a requested descriptor can be given

@@ -18,6 +18,31 @@
 #define G25_LED_PORT SPI_PORT
 #define G25_LED_BIT SPI_MOSI_PIN
 
+// button layout defines
+
+#define SPARE1		(1<<0)	// spare pin on shift register
+#define PRESSED		(1<<1)	// is the reverse switch pressed
+#define SPARE2		(1<<2)	// spare pin on shift register
+#define SEQUENTIAL	(1<<3)	// sequential or H-pattern
+
+#define RED4_BITS	4	// bits 4..7
+#define L3		(1<<3)
+#define SELECT		(1<<1)
+#define START		(1<<0)
+#define R3		(1<<2)
+
+#define TOP4_BITS	8	// bits 8..11
+#define TRIANGLE	(1<<0)
+#define CIRCLE		(1<<1)
+#define SQUARE		(1<<2)
+#define CROSS		(1<<3)
+
+#define DPAD_BITS	12	// bits 12..15
+#define NORTH		(1<<3)
+#define WEST		(1<<1)
+#define EAST		(1<<0)
+#define SOUTH		(1<<2)
+
 #define BUTTON_MODE_AND_CLOCK_WAIT 10
 
 // blink every second when USB connected
